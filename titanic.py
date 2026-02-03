@@ -14,11 +14,29 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import confusion_matrix
 
-N_TREES = 20
+import argparse
+from dotenv import load_dotenv
+import os
+
+parser = argparse.ArgumentParser(description="Random Forest params")
+parser.add_argument(
+    "--n_trees", type=int, default=20, help="number of trees"
+)
+args = parser.parse_args()
+print(args.n_trees)
+
+
+N_TREES = args.n_trees
 MAX_DEPTH = None
 MAX_FEATURES = "sqrt"
-JETON_API = "$trotskitueleski1917"
 
+load_dotenv()
+jeton_api = os.environ.get("JETON_API", "")
+
+if jeton_api.startswith("$"):
+    print("API token has been configured properly")
+else:
+    print("API token has not been configured")
 
 # IMPORT ET EXPLORATION DONNEES --------------------------------
 
