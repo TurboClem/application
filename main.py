@@ -8,9 +8,22 @@ import pandas as pd
 from dotenv import load_dotenv
 import argparse
 from sklearn.model_selection import train_test_split
+import logging
 
-from build_pipeline import create_pipeline
-from train_evaluate import evaluate_model
+from src.pipeline.build_pipeline import create_pipeline
+from src.models.train_evaluate import evaluate_model
+
+
+logging.basicConfig(
+    format="{asctime} - {levelname} - {message}",
+    style="{",
+    datefmt="%Y-%m-%d %H:%M",
+    level=logging.DEBUG,
+    handlers=[
+        logging.FileHandler("recording.log"),
+        logging.StreamHandler()
+    ]
+)
 
 
 # ENVIRONMENT CONFIGURATION ---------------------------
@@ -25,20 +38,20 @@ args = parser.parse_args()
 
 n_trees = args.n_trees
 jeton_api = os.environ.get("JETON_API", "")
-data_path = os.environ.get("DATA_PATH", "data.csv")
+data_path = os.environ.get("DATA_PATH", "data/raw/data.csv")
 
 MAX_DEPTH = None
 MAX_FEATURES = "sqrt"
 
 if jeton_api.startswith("$"):
-    print("API token has been configured properly")
+    logging.info("API token has been configured properly")
 else:
-    print("API token has not been configured")
+    logging.warning("API token has not been configured")
 
 
 # IMPORT ET STRUCTURATION DONNEES --------------------------------
 
-TrainingData = pd.read_csv("data.csv")
+TrainingData = pd.read_csv(data_path)
 
 y = TrainingData["Survived"]
 X = TrainingData.drop("Survived", axis="columns")
@@ -60,7 +73,7 @@ pipe = create_pipeline(
 pipe.fit(X_train, y_train)
 score, matrix = evaluate_model(pipe, X_test, y_test)
 
-print(f"{score:.1%} de bonnes réponses sur les données de test pour validation")
-print(20 * "-")
-print("matrice de confusion")
-print(matrix)
+logging.info(f"{score:.1%} de bonnes réponses sur les données de test pour validation")
+logging.info(20 * "-")
+logging.info("matrice de confusion")
+logging.info(matrix)
